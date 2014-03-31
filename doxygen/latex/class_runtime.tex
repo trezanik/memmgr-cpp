@@ -1,0 +1,129 @@
+\section{Runtime Class Reference}
+\label{class_runtime}\index{Runtime@{Runtime}}
+
+
+{\ttfamily \#include $<$Runtime.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_allocator}{Allocator} $\ast$ \hyperlink{class_runtime_ad0f43e4d3f89778adb284d1d3f47287e}{Memory} () const 
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{class_runtime}{Runtime} \& \hyperlink{class_runtime_a1146c295df34dff8c1935ec0436edd7d}{Instance} ()
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_runtime}{Runtime} \hyperlink{class_runtime_a69f3a8dea91a5f75ec52fa7ce9f5c3da}{operator=} (\hyperlink{class_runtime}{Runtime} const \&)
+\item 
+\hyperlink{class_runtime_a120a745fa3a6d5bae2ea5415163d79f9}{Runtime} (\hyperlink{class_runtime}{Runtime} const \&)
+\item 
+\hyperlink{class_runtime_a522dc4b36f2a770bbe3e62c451f38841}{Runtime} ()
+\item 
+\hyperlink{class_runtime_a69418e2a8c03d0e24cdc63eb88b52d28}{$\sim$\-Runtime} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Dedicated class for storing all 'global' variables. This itself is accessed through an extern by the runtime code, so is in itself actually a global.
+
+The classes accessed are not constructed until their first call, which keeps the application startup brief. You can therefore make assumptions in the child classes about the lifetimes of other objects, and safely know each will have their destructor called before the runtime is destroyed. 
+
+Definition at line 28 of file Runtime.\-h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{Runtime@{Runtime}!Runtime@{Runtime}}
+\index{Runtime@{Runtime}!Runtime@{Runtime}}
+\subsubsection[{Runtime}]{\setlength{\rightskip}{0pt plus 5cm}Runtime\-::\-Runtime (
+\begin{DoxyParamCaption}
+\item[{{\bf Runtime} const \&}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_runtime_a120a745fa3a6d5bae2ea5415163d79f9}
+\index{Runtime@{Runtime}!Runtime@{Runtime}}
+\index{Runtime@{Runtime}!Runtime@{Runtime}}
+\subsubsection[{Runtime}]{\setlength{\rightskip}{0pt plus 5cm}Runtime\-::\-Runtime (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_runtime_a522dc4b36f2a770bbe3e62c451f38841}
+
+
+Definition at line 19 of file Runtime.\-cc.
+
+
+\begin{DoxyCode}
+20 \{
+21 \}
+\end{DoxyCode}
+\index{Runtime@{Runtime}!$\sim$\-Runtime@{$\sim$\-Runtime}}
+\index{$\sim$\-Runtime@{$\sim$\-Runtime}!Runtime@{Runtime}}
+\subsubsection[{$\sim$\-Runtime}]{\setlength{\rightskip}{0pt plus 5cm}Runtime\-::$\sim$\-Runtime (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_runtime_a69418e2a8c03d0e24cdc63eb88b52d28}
+
+
+Definition at line 25 of file Runtime.\-cc.
+
+
+\begin{DoxyCode}
+26 \{
+27 \}
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{Runtime@{Runtime}!Instance@{Instance}}
+\index{Instance@{Instance}!Runtime@{Runtime}}
+\subsubsection[{Instance}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf Runtime}\& Runtime\-::\-Instance (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}\label{class_runtime_a1146c295df34dff8c1935ec0436edd7d}
+Acquires the singleton reference to the class. Only used within \hyperlink{_runtime_8cc}{Runtime.\-cc} in order to make the runtime accessible globally (accessed by 'runtime') -\/ shouldn't be used outside of this. 
+
+Definition at line 46 of file Runtime.\-h.
+
+
+\begin{DoxyCode}
+47         \{
+48                 \textcolor{keyword}{static} Runtime  rtime;
+49                 \textcolor{keywordflow}{return} rtime;
+50         \}
+\end{DoxyCode}
+\index{Runtime@{Runtime}!Memory@{Memory}}
+\index{Memory@{Memory}!Runtime@{Runtime}}
+\subsubsection[{Memory}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Allocator} $\ast$ Runtime\-::\-Memory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{class_runtime_ad0f43e4d3f89778adb284d1d3f47287e}
+Retrieves a pointer to the static \hyperlink{class_allocator}{Allocator} variable.
+
+\begin{DoxyReturn}{Returns}
+Always returns a pointer to an \hyperlink{class_allocator}{Allocator} instance; never fails 
+\end{DoxyReturn}
+
+
+Definition at line 34 of file Runtime.\-cc.
+
+
+\begin{DoxyCode}
+35 \{
+36         \textcolor{keyword}{static} Allocator        mem;
+37         \textcolor{keywordflow}{return} &mem;
+38 \}
+\end{DoxyCode}
+\index{Runtime@{Runtime}!operator=@{operator=}}
+\index{operator=@{operator=}!Runtime@{Runtime}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Runtime} Runtime\-::operator= (
+\begin{DoxyParamCaption}
+\item[{{\bf Runtime} const \&}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_runtime_a69f3a8dea91a5f75ec52fa7ce9f5c3da}

@@ -84,16 +84,20 @@ struct memblock_header
 	/** A pointer to this memory blocks footer */
 	memblock_footer*	footer;
 
-	/** A pointer to the object that allocated the memory. If there was none,
-	 * i.e. it was a standalone function, this member is a nullptr. */
+	/** A pointer to the object that allocated the memory. Requires manual
+	 * calling, may aid in debugging certain scenarios but not needed in the
+	 * majority of cases. Left here as an example of associating a block of
+	 * memory with a calling Class. */
 	const Object*		owner;
 
 	/**
 	 * The file this memory block was created in; is not allocated dynamically,
-	 * and so is bound by the @a MEM_MAX_FILENAME_LENGTH definition.
+	 * and so is bound by the MEM_MAX_FILENAME_LENGTH definition.
 	 */
 	char		file[MEM_MAX_FILENAME_LENGTH+1];
-	/** The function name this memory block was created in */
+	/** The function name this memory block was created in; like the file
+	 * member, is not allocated dynamically, and so is bound by the
+	 * MEM_MAX_FUNCTION_LENGTH definition*/
 	char		function[MEM_MAX_FUNCTION_LENGTH+1];
 	/** The line in the file this memory block was created in */
 	uint32_t	line;
@@ -173,22 +177,6 @@ private:
 
 
 	/**
-	 * Called only in the destructor; will always output the memory stats
-	 * for the application run, but will also write out the information on
-	 * any unfreed memory.
-	 *
-	 * Outputs to MEM_LEAK_LOG_NAME, but if it's not writable, it is printed
-	 * to stderr instead.
-	 */
-	void
-	OutputMemoryInfo();
-
-
-public:
-	~Allocator();
-
-
-	/**
 	 * Checks a block of memory, ensuring both the header and footer are not
 	 * corrupt, and the rest of the block matches the original requestors
 	 * specifications.
@@ -206,7 +194,57 @@ public:
 	) const;
 
 
+
 	/**
+	 * Validates a block of memory; if no block is supplied, and nullptr is
+	 * passed in, every tracked block currently present is validated.
+	 *
+	 * If present, the block passed in must be at the header, and NOT the
+	 * pointer returned to the of the TrackedAlloc/TrackedRealloc caller.
+	 *
+	 * Internally calls CheckBlock().
+	 *
+	 * @param[in] memory A pointer to the block of memory to validate
+	 * @retval true if the memory is not corrupt and usable
+	 * @retval false if the memory failed one of the checks
+	 */
+	bool
+	ValidateMemory(
+		void* memory
+	) const;
+
+
+public:
+	~Allocator();
+
+
+	/**
+	 * Called only in the destructor, but available for calling manually if
+	 * desired; will always output the memory stats for the application run,
+	 * but will also write out the information on any unfreed memory.
+	 *
+	 * Outputs to MEM_LEAK_LOG_NAME, but if it's not writable, it is printed
+	 * to stderr instead.
+	 */
+	void
+	OutputMemoryInfo();
+
+
+	/**
+	 * Tracked version of malloc - use the MALLOC macro to call this, as it
+	 * will setup the parameters for you, barring the num_bytes.
+	 *
+	 * This function will dynamically alter the requested amount in order to
+	 * leave space for a header and footer; the client code does not need to
+	 * handle, or be aware, of this fact.
+	 *
+	 * @param[in] num_bytes The number of bytes to allocate
+	 * @param[in] file The file this method was called in
+	 * @param[in] function The function this method was called in
+	 * @param[in] line The line number in the file this method was called in
+	 * @param[in] owner (Optional) The owner of the memory block
+	 * @return A pointer to the allocated memory, or a nullptr if the
+	 * allocation failed.
 	 */
 	void*
 	TrackedAlloc(
@@ -219,6 +257,17 @@ public:
 
 
 	/**
+	 * Tracked version of free - use the FREE macro to call this, for
+	 * consistency and potential future changes.
+	 *
+	 * In compliance with the C standard, if memory is a nullptr, this
+	 * function performs no action. No action is also performed if a
+	 * memory validation check fails (i.e. the supplied block is corrupt or
+	 * otherwise invalid), as doing so could crash the application, and
+	 * miss logging the information.
+	 *
+	 * @param[in] memory A pointer to the memory previously allocated by
+	 * TrackedAlloc (which should be called via MALLOC)
 	 */
 	void
 	TrackedFree(
@@ -227,13 +276,27 @@ public:
 
 
 	/**
+	 * Tracked version of realloc - use the REALLOC macro to call this.
+	 *
+	 * In compliance with the C standard, if memory_block is a nullptr,
+	 * the end result is the same as calling TrackedAlloc (i.e. malloc). The
+	 * same applies if num_bytes is 0 - TrackedFree (i.e. free) will be
+	 * called on the memory_block.
+	 *
+	 * No validation is performed on the original block of memory, and
+	 * unlike the real realloc, we call TrackedAlloc regardless of size
+	 * differences and other parameters. The previous memory is then moved
+	 * into this newly allocated block, and the original freed.
+	 *
+	 * As a result, a TrackedRealloc guarantees that the returned pointer
+	 * will never be the same as the one passed in.
 	 *
 	 * @param[in] memory_block The pointer to memory returned by TrackedAlloc()
 	 * @param[in] num_bytes The new number of bytes to allocate
-	 * @param[in] file The file this function was called in
-	 * @param[in] function The function this function was called in
-	 * @param[in] line The line number in the file this function was called in
-	 * @param[in] owner The owner of the memory block
+	 * @param[in] file The file this method was called in
+	 * @param[in] function The function this method was called in
+	 * @param[in] line The line number in the file this method was called in
+	 * @param[in] owner (Optional) The owner of the memory block
 	 * @retval nullptr if the function fails due to invalid parameters, or
 	 * the call to realloc fails
 	 * @return A pointer to the usable block of memory allocated
@@ -247,19 +310,6 @@ public:
 		const uint32_t line,
 		const Object* owner = nullptr
 	);
-
-
-	/**
-	 *
-	 * @param memory [in] the block of memory (as supplied by this function)
-	 * to validate
-	 * @retval true if the memory is not corrupt and usable
-	 * @retval false if the memory failed one of the checks
-	 */
-	bool
-	ValidateMemory(
-		void* memory
-	) const;
 };
 
 
@@ -277,6 +327,9 @@ public:
 
 /** Macro to create tracked memory */
 	#define MALLOC(size)		runtime.Memory()->TrackedAlloc(size, __FILE__, __FUNCTION__, __LINE__)
+
+/** Macro to reallocate tracked memory */
+	#define REALLOC(ptr,size)	runtime.Memory()->TrackedRealloc(ptr, size, __FILE__, __FUNCTION__, __LINE__)
 
 /** Macro to delete tracked memory */
 	#define FREE(varname)		runtime.Memory()->TrackedFree(varname)

@@ -1,0 +1,869 @@
+\section{Allocator Class Reference}
+\label{class_allocator}\index{Allocator@{Allocator}}
+
+
+{\ttfamily \#include $<$Allocator.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_allocator_ae6af139c96381e0c00dc82d291669577}{$\sim$\-Allocator} ()
+\item 
+void \hyperlink{class_allocator_a2d9d6327796ee89122783396f4014b28}{Output\-Memory\-Info} ()
+\item 
+void $\ast$ \hyperlink{class_allocator_aff5c82b73f460d9520d440373b86acdb}{Tracked\-Alloc} (const uint32\-\_\-t num\-\_\-bytes, const char $\ast$file, const char $\ast$function, const uint32\-\_\-t line, const Object $\ast$owner=nullptr)
+\item 
+void \hyperlink{class_allocator_ae88ef2e17cf916e2efdf96280adca9fb}{Tracked\-Free} (void $\ast$memory)
+\item 
+void $\ast$ \hyperlink{class_allocator_a4b9da5e10ea4e5952437b83ba54742ad}{Tracked\-Realloc} (void $\ast$memory\-\_\-block, const uint32\-\_\-t num\-\_\-bytes, const char $\ast$file, const char $\ast$function, const uint32\-\_\-t line, const Object $\ast$owner=nullptr)
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_allocator}{Allocator} \hyperlink{class_allocator_a613e931c75f43c3016577cafcdccb1ed}{operator=} (\hyperlink{class_allocator}{Allocator} const \&)
+\item 
+\hyperlink{class_allocator_ad5d479295ad0b494ac3bbc5defe00695}{Allocator} (\hyperlink{class_allocator}{Allocator} const \&)
+\item 
+\hyperlink{class_allocator_acd81cd6a9337a081c558f89661b623d7}{Allocator} ()
+\item 
+\hyperlink{_allocator_8h_adc7040deea27628dba424c534b71dbbf}{E\-\_\-\-M\-E\-M\-O\-R\-Y\-\_\-\-E\-R\-R\-O\-R} \hyperlink{class_allocator_ad1c15835d7b080beb8c56b21e0014553}{Check\-Block} (\hyperlink{structmemblock__header}{memblock\-\_\-header} $\ast$memory\-\_\-block) const 
+\item 
+bool \hyperlink{class_allocator_abff2b252396640dde0593c12ee7f62b4}{Validate\-Memory} (void $\ast$memory) const 
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+uint32\-\_\-t \hyperlink{class_allocator_a62a5f8bb48b4417a9c20fec53dfd7201}{\-\_\-allocs}
+\item 
+uint32\-\_\-t \hyperlink{class_allocator_aef8120c4c4eeec914b6fb7aa609eb533}{\-\_\-frees}
+\item 
+uint32\-\_\-t \hyperlink{class_allocator_a3df5e505a4e72b64ea8c055e7f385bb3}{\-\_\-current\-\_\-allocated}
+\item 
+uint32\-\_\-t \hyperlink{class_allocator_adaa40e36af99c1828a96f264ee405331}{\-\_\-total\-\_\-allocated}
+\item 
+std\-::recursive\-\_\-mutex \hyperlink{class_allocator_aeb33ace056dd043efbec5ea4115ae305}{\-\_\-mutex}
+\item 
+std\-::vector$<$ \hyperlink{structmemblock__header}{memblock\-\_\-header} $\ast$ $>$ \hyperlink{class_allocator_a14b439fa46e392aca969b4c4cf99fd19}{\-\_\-memblocks}
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_allocator_af3d14e26ba8af9e6cc5a32aad8446de7}{Runtime}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Resides within the application runtime and tracks all memory allocations and frees, ensuring data is not corrupt or the memory leaked.
+
+This overrides all new/delete calls so they will N\-O\-T be usable, ensuring the correct functions are always called for the application. As system headers should always be included before this one, it will not stop normal A\-P\-I functions from working -\/ if you do have a problem, check your inclusion order!
+
+malloc/free and associates are not overriden, enabling their usage in certain special cases where using this class would be inappropriate or infeasible -\/ such as allocating for this class in the first place. 
+
+Definition at line 144 of file Allocator.\-h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{Allocator@{Allocator}!Allocator@{Allocator}}
+\index{Allocator@{Allocator}!Allocator@{Allocator}}
+\subsubsection[{Allocator}]{\setlength{\rightskip}{0pt plus 5cm}Allocator\-::\-Allocator (
+\begin{DoxyParamCaption}
+\item[{{\bf Allocator} const \&}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_ad5d479295ad0b494ac3bbc5defe00695}
+\index{Allocator@{Allocator}!Allocator@{Allocator}}
+\index{Allocator@{Allocator}!Allocator@{Allocator}}
+\subsubsection[{Allocator}]{\setlength{\rightskip}{0pt plus 5cm}Allocator\-::\-Allocator (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_acd81cd6a9337a081c558f89661b623d7}
+
+
+Definition at line 56 of file Allocator.\-cc.
+
+
+
+References \-\_\-memblocks.
+
+
+\begin{DoxyCode}
+56                      :
+57         _allocs(0), _frees(0), _current_allocated(0), _total_allocated(0)
+58 \{
+59         \textcolor{comment}{/* reserve 100 internal allocations. Will breach, but should cause the}
+60 \textcolor{comment}{         * expansions to be 200, 400, 800, etc. */}
+61         _memblocks.reserve(100);
+62 \}
+\end{DoxyCode}
+\index{Allocator@{Allocator}!$\sim$\-Allocator@{$\sim$\-Allocator}}
+\index{$\sim$\-Allocator@{$\sim$\-Allocator}!Allocator@{Allocator}}
+\subsubsection[{$\sim$\-Allocator}]{\setlength{\rightskip}{0pt plus 5cm}Allocator\-::$\sim$\-Allocator (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_allocator_ae6af139c96381e0c00dc82d291669577}
+
+
+Definition at line 66 of file Allocator.\-cc.
+
+
+
+References \-\_\-memblocks, M\-E\-M\-\_\-\-L\-E\-A\-K\-\_\-\-L\-O\-G\-\_\-\-N\-A\-M\-E, and Output\-Memory\-Info().
+
+
+\begin{DoxyCode}
+67 \{
+68         \textcolor{keywordflow}{if} ( !_memblocks.empty() )
+69         \{
+70                 printf(\textcolor{stringliteral}{"Memory Leak Detected\(\backslash\)n\(\backslash\)nCheck '%s' for details\(\backslash\)n"},
+71                        MEM_LEAK_LOG_NAME);
+72         \}
+73 
+74         OutputMemoryInfo();
+75 \}
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{Allocator@{Allocator}!Check\-Block@{Check\-Block}}
+\index{Check\-Block@{Check\-Block}!Allocator@{Allocator}}
+\subsubsection[{Check\-Block}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\-\_\-\-M\-E\-M\-O\-R\-Y\-\_\-\-E\-R\-R\-O\-R} Allocator\-::\-Check\-Block (
+\begin{DoxyParamCaption}
+\item[{{\bf memblock\-\_\-header} $\ast$}]{memory\-\_\-block}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_ad1c15835d7b080beb8c56b21e0014553}
+Checks a block of memory, ensuring both the header and footer are not corrupt, and the rest of the block matches the original requestors specifications.
+
+Define D\-I\-S\-A\-B\-L\-E\-\_\-\-M\-E\-M\-O\-R\-Y\-\_\-\-C\-H\-E\-C\-K\-\_\-\-T\-O\-\_\-\-S\-T\-D\-O\-U\-T to prevent stage-\/by-\/stage output of the checking process.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em memory\-\_\-block} & The block of memory to check \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em E\-\_\-\-M\-E\-M\-O\-R\-Y\-\_\-\-E\-R\-R\-O\-R} & The relevant memory error code as to the block status; should hopefully always be E\-C\-\_\-\-No\-Error \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 80 of file Allocator.\-cc.
+
+
+
+References E\-C\-\_\-\-Corrupt\-Footer, E\-C\-\_\-\-Corrupt\-Header, E\-C\-\_\-\-No\-Error, E\-C\-\_\-\-No\-Memory\-Block, E\-C\-\_\-\-Size\-Mismatch, memblock\-\_\-header\-::file, memblock\-\_\-header\-::footer, memblock\-\_\-header\-::line, memblock\-\_\-footer\-::magic, memblock\-\_\-header\-::magic, mem\-\_\-footer\-\_\-magic, mem\-\_\-header\-\_\-magic, memblock\-\_\-header\-::real\-\_\-size, and memblock\-\_\-header\-::requested\-\_\-size.
+
+
+
+Referenced by Output\-Memory\-Info(), and Validate\-Memory().
+
+
+\begin{DoxyCode}
+83 \{
+84         uint32\_t        block\_size = 0;
+85 
+86         \textcolor{keywordflow}{if} ( memory\_block == \textcolor{keyword}{nullptr} )
+87                 \textcolor{keywordflow}{goto} null\_block;
+88 
+89 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_CHECK\_TO\_STDOUT)}
+90 \textcolor{preprocessor}{}        printf(\textcolor{stringliteral}{"\(\backslash\)tChecking Memory Block %p..\(\backslash\)n"}, memory\_block);
+91         printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tGlobal Header magic number is %lu bytes in size :: %#x\(\backslash\)n"}, \textcolor{keyword}{sizeof}(
+      mem_header_magic), mem_header_magic);
+92         printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tGlobal Footer magic number is %lu bytes in size :: %#x\(\backslash\)n"}, \textcolor{keyword}{sizeof}(
+      mem_footer_magic), mem_footer_magic);
+93 \textcolor{preprocessor}{#endif}
+94 \textcolor{preprocessor}{}
+95         \textcolor{keywordflow}{if} ( memcmp(&memory\_block->magic,
+96                 &mem_header_magic,
+97                 \textcolor{keyword}{sizeof}(mem_header_magic)) != 0 )
+98         \{
+99                 \textcolor{comment}{/* memory\_block magic number has been modified; block contents}
+100 \textcolor{comment}{                 * are unstable */}
+101                 \textcolor{keywordflow}{goto} corrupt\_header;
+102         \}
+103 
+104 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_CHECK\_TO\_STDOUT)}
+105 \textcolor{preprocessor}{}        printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tHas a valid header (%lu bytes, %#x)...\(\backslash\)n"},
+106                 \textcolor{keyword}{sizeof}(memory\_block->magic), memory\_block->magic);
+107         printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tHeader Info:: %u (%u requested) bytes, line %u in %s\(\backslash\)n"},
+108                 memory\_block->real_size, memory\_block->requested_size,
+109                 memory\_block->line, memory\_block->file);
+110 \textcolor{preprocessor}{#endif}
+111 \textcolor{preprocessor}{}
+112         \textcolor{keywordflow}{if} ( memory\_block->footer == \textcolor{keyword}{nullptr} ||
+113                 memcmp(&memory\_block->footer->magic, &mem_footer_magic, \textcolor{keyword}{sizeof}(
+      mem_footer_magic)) != 0 )
+114         \{
+115                 \textcolor{comment}{/* memory\_block footer magic has been modified - as the header}
+116 \textcolor{comment}{                 * is not corrupt, we can retrieve the allocation info safely */}
+117                 \textcolor{keywordflow}{goto} corrupt\_footer;
+118         \}
+119 
+120 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_CHECK\_TO\_STDOUT)}
+121 \textcolor{preprocessor}{}        printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tHas a valid footer (%lu bytes, %#x)...\(\backslash\)n"},
+122                 \textcolor{keyword}{sizeof}(memory\_block->footer->magic),
+123                 memory\_block->footer->magic);
+124 \textcolor{preprocessor}{#endif}
+125 \textcolor{preprocessor}{}
+126         \textcolor{comment}{// calculate the size requested by removing the header + footer}
+127         block\_size = ((uint8\_t*)memory\_block->footer) - ((uint8\_t*)memory\_block + \textcolor{keyword}{sizeof}(
+      memblock_header));
+128 
+129 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_CHECK\_TO\_STDOUT)}
+130 \textcolor{preprocessor}{}        printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tCalculated block\_size is %u bytes\(\backslash\)n"}, block\_size);
+131 \textcolor{preprocessor}{#endif}
+132 \textcolor{preprocessor}{}
+133         \textcolor{keywordflow}{if} ( memory\_block->requested_size != block\_size )
+134         \{
+135                 \textcolor{comment}{/* The size stored by the memory\_block header is different from}
+136 \textcolor{comment}{                 * that calculated (remember we've already validated the magic}
+137 \textcolor{comment}{                 * numbers) */}
+138                 \textcolor{keywordflow}{goto} invalid\_size;
+139         \}
+140 
+141 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_CHECK\_TO\_STDOUT)}
+142 \textcolor{preprocessor}{}        printf(\textcolor{stringliteral}{"\(\backslash\)t\(\backslash\)tHas a valid app\_mem size (%u bytes)\(\backslash\)n\(\backslash\)t\(\backslash\)tValidated!\(\backslash\)n"},
+143                block\_size);
+144 \textcolor{preprocessor}{#endif}
+145 \textcolor{preprocessor}{}
+146         \textcolor{comment}{// memory\_block is as expected}
+147 
+148         \textcolor{keywordflow}{return} E_MEMORY_ERROR::EC_NoError;
+149 
+150 null\_block:
+151         \textcolor{comment}{// Optional: Raise error}
+152         \textcolor{keywordflow}{return} E_MEMORY_ERROR::EC_NoMemoryBlock;
+153 corrupt\_header:
+154         \textcolor{comment}{// Optional: Raise error}
+155         \textcolor{keywordflow}{return} E_MEMORY_ERROR::EC_CorruptHeader;
+156 corrupt\_footer:
+157         \textcolor{comment}{// Optional: Raise error}
+158         \textcolor{keywordflow}{return} E_MEMORY_ERROR::EC_CorruptFooter;
+159 invalid\_size:
+160         \textcolor{comment}{// Optional: Raise error}
+161         \textcolor{keywordflow}{return} E_MEMORY_ERROR::EC_SizeMismatch;
+162 \}
+\end{DoxyCode}
+\index{Allocator@{Allocator}!operator=@{operator=}}
+\index{operator=@{operator=}!Allocator@{Allocator}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Allocator} Allocator\-::operator= (
+\begin{DoxyParamCaption}
+\item[{{\bf Allocator} const \&}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_a613e931c75f43c3016577cafcdccb1ed}
+\index{Allocator@{Allocator}!Output\-Memory\-Info@{Output\-Memory\-Info}}
+\index{Output\-Memory\-Info@{Output\-Memory\-Info}!Allocator@{Allocator}}
+\subsubsection[{Output\-Memory\-Info}]{\setlength{\rightskip}{0pt plus 5cm}void Allocator\-::\-Output\-Memory\-Info (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_allocator_a2d9d6327796ee89122783396f4014b28}
+Called only in the destructor, but available for calling manually if desired; will always output the memory stats for the application run, but will also write out the information on any unfreed memory.
+
+Outputs to M\-E\-M\-\_\-\-L\-E\-A\-K\-\_\-\-L\-O\-G\-\_\-\-N\-A\-M\-E, but if it's not writable, it is printed to stderr instead. \begin{DoxyRefDesc}{Todo}
+\item[\hyperlink{todo__todo000001}{Todo}]causes warning 'cast to pointer from integer of different size' \end{DoxyRefDesc}
+
+
+Definition at line 167 of file Allocator.\-cc.
+
+
+
+References \-\_\-allocs, \-\_\-current\-\_\-allocated, \-\_\-frees, \-\_\-memblocks, \-\_\-total\-\_\-allocated, block\-\_\-offset\-\_\-realmem, Check\-Block(), E\-C\-\_\-\-Corrupt\-Footer, E\-C\-\_\-\-Corrupt\-Header, E\-C\-\_\-\-No\-Memory\-Block, E\-C\-\_\-\-Size\-Mismatch, H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E, M\-E\-M\-\_\-\-L\-E\-A\-K\-\_\-\-L\-O\-G\-\_\-\-N\-A\-M\-E, M\-E\-M\-\_\-\-O\-U\-T\-P\-U\-T\-\_\-\-L\-I\-M\-I\-T, and P\-R\-I\-N\-T\-\_\-\-P\-O\-I\-N\-T\-E\-R.
+
+
+
+Referenced by $\sim$\-Allocator().
+
+
+\begin{DoxyCode}
+168 \{
+169         FILE*           leak\_file;
+170         \textcolor{keywordtype}{bool}            close\_file = \textcolor{keyword}{true};
+171         uint32\_t        i = 0;
+172         E_MEMORY_ERROR  result;
+173         \textcolor{comment}{// we don't store/track the user-requested amounts, only the real}
+174         uint32\_t        requested\_alloc;
+175         uint32\_t        requested\_unfreed;
+176 
+177         \textcolor{comment}{/* since Windows has been kind enough to not provide more standards}
+178 \textcolor{comment}{         * complaint security functionality, we shall have to use their own}
+179 \textcolor{comment}{         * fopen\_s. POSIX builds can happily use the 'x' flag to provide a}
+180 \textcolor{comment}{         * decent security level - fopen\_s is still vulnerable to potential}
+181 \textcolor{comment}{         * exploits ironically... */}
+182 \textcolor{preprocessor}{#if defined(\_WIN32)}
+183 \textcolor{preprocessor}{}        \textcolor{keywordflow}{if} ( fopen\_s(&leak\_file, MEM_LEAK_LOG_NAME, \textcolor{stringliteral}{"w+"}) != 0 )
+184         \{
+185 \textcolor{preprocessor}{#else}
+186 \textcolor{preprocessor}{}        \textcolor{keywordflow}{if} (( leak\_file = fopen(MEM_LEAK_LOG_NAME, \textcolor{stringliteral}{"w+"})) == \textcolor{keyword}{nullptr} )
+187         \{
+188 \textcolor{preprocessor}{#endif}
+189 \textcolor{preprocessor}{}                leak\_file = stdout;
+190                 close\_file = \textcolor{keyword}{false};
+191         \}
+192 
+193         \textcolor{comment}{/* Remove memory block sizes, multiplied by the number of allocations,}
+194 \textcolor{comment}{         * which is taken away from the total amount allocated. */}
+195         requested\_alloc         = _total_allocated - (HEADER_FOOTER_SIZE * 
+      _allocs);
+196         \textcolor{comment}{/* Remove memory block sizes, multiplied by the number of pending frees,}
+197 \textcolor{comment}{         * which is to be taken away from the current amount still allocated. */}
+198         requested\_unfreed       = _current_allocated - (HEADER_FOOTER_SIZE * (
+      _allocs - _frees));
+199 
+200         fprintf(leak\_file,
+201                 \textcolor{stringliteral}{"# Details\(\backslash\)n"}
+202                 \textcolor{stringliteral}{"Header+Footer Size......: %lu\(\backslash\)n"}
+203                 \textcolor{stringliteral}{"\(\backslash\)n"}
+204                 \textcolor{stringliteral}{"# Code Stats\(\backslash\)n"}
+205                 \textcolor{stringliteral}{"Allocations.............: %u\(\backslash\)n"}
+206                 \textcolor{stringliteral}{"Frees...................: %u\(\backslash\)n"}
+207                 \textcolor{stringliteral}{"Pending Frees...........: %u\(\backslash\)n"}
+208                 \textcolor{stringliteral}{"\(\backslash\)n"}
+209                 \textcolor{stringliteral}{"# Totals, Real\(\backslash\)n"}
+210                 \textcolor{stringliteral}{"Bytes Allocated.........: %u\(\backslash\)n"}
+211                 \textcolor{stringliteral}{"Unfreed Bytes...........: %u\(\backslash\)n"}
+212                 \textcolor{stringliteral}{"\(\backslash\)n"}
+213                 \textcolor{stringliteral}{"# Totals, Requested\(\backslash\)n"}
+214                 \textcolor{stringliteral}{"Bytes Allocated.........: %u\(\backslash\)n"}
+215                 \textcolor{stringliteral}{"Unfreed Bytes...........: %u\(\backslash\)n"}
+216                 \textcolor{stringliteral}{"\(\backslash\)n"}
+217                 \textcolor{stringliteral}{"##################\(\backslash\)n"}
+218                 \textcolor{stringliteral}{"  Unfreed Blocks  \(\backslash\)n"},
+219                 HEADER_FOOTER_SIZE,
+220                 _allocs, _frees, (_allocs - _frees),
+221                 _total_allocated, _current_allocated,
+222                 requested\_alloc, requested\_unfreed
+223                 );
+224 
+225 
+226         \textcolor{keywordflow}{for} ( \textcolor{keyword}{auto} block\_ptr : _memblocks )
+227         \{
+228                 i++;
+229 
+230                 fprintf(leak\_file,
+231                         \textcolor{stringliteral}{"##################\(\backslash\)n"}
+232                         \textcolor{stringliteral}{"%u)\(\backslash\)n"}
+233                         \textcolor{stringliteral}{"Block...: "} PRINT_POINTER
+234                         \textcolor{stringliteral}{"\(\backslash\)n"},
+235                         i, (uintptr\_t)block\_ptr
+236                 );
+237 
+238                 result = CheckBlock(block\_ptr);
+239                 \textcolor{keywordflow}{switch} ( result )
+240                 \{
+241                 \textcolor{keywordflow}{case} E_MEMORY_ERROR::EC_NoMemoryBlock:
+242                         \{
+243                                 fprintf(leak\_file,
+244                                         \textcolor{stringliteral}{"Error...: Block Pointer was NULL\(\backslash\)n"}
+245                                 );
+246                                 \textcolor{keywordflow}{break};
+247                         \}
+248                 \textcolor{keywordflow}{case} E_MEMORY_ERROR::EC_CorruptFooter:
+249                         \{
+250                                 fprintf(leak\_file,
+251                                         \textcolor{stringliteral}{"Error...: Corrupt Footer\(\backslash\)n"}
+252                                 );
+253                                 \textcolor{keywordflow}{break};
+254                         \}
+255                 \textcolor{keywordflow}{case} E_MEMORY_ERROR::EC_CorruptHeader:
+256                         \{
+257                                 fprintf(leak\_file,
+258                                         \textcolor{stringliteral}{"Error...: Corrupt Header\(\backslash\)n"}
+259                                 );
+260                                 \textcolor{keywordflow}{break};
+261                         \}
+262                 \textcolor{keywordflow}{case} E_MEMORY_ERROR::EC_SizeMismatch:
+263                         \{
+264                                 fprintf(leak\_file,
+265                                         \textcolor{stringliteral}{"Error...: Size Mismatch (%u actual bytes)\(\backslash\)n"},
+266                                         block\_ptr->requested\_size
+267                                 );
+268                                 \textcolor{keywordflow}{break};
+269                         \}
+270                 \textcolor{keywordflow}{default}:
+271                         \textcolor{keywordflow}{break};
+272                 \}
+273 
+274                 \textcolor{comment}{/* can't fall through in switch, so have to do a secondary check}
+275 \textcolor{comment}{                 * as we can't print data that's corrupt or a nullptr */}
+276                 \textcolor{keywordflow}{if} ( result != EC_NoMemoryBlock && result != EC_CorruptHeader )
+277                 \{
+278                         fprintf(leak\_file,
+279                                 \textcolor{stringliteral}{"Size....: %u\(\backslash\)n"}
+280                                 \textcolor{stringliteral}{"Function: %s\(\backslash\)n"}
+281                                 \textcolor{stringliteral}{"File....: %s\(\backslash\)n"}
+282                                 \textcolor{stringliteral}{"Line....: %u\(\backslash\)n"}
+283                                 \textcolor{stringliteral}{"Owner...: %p\(\backslash\)n"},
+284                                 block\_ptr->requested\_size,
+285                                 block\_ptr->function,
+286                                 block\_ptr->file,
+287                                 block\_ptr->line,
+288                                 block\_ptr->owner
+289                         );
+290                         fprintf(leak\_file, \textcolor{stringliteral}{"Data....: "});
+291                         \textcolor{keywordflow}{for} ( uint32\_t j = 0;
+292                                 j < block\_ptr->requested\_size && j < 
+      MEM_OUTPUT_LIMIT;
+293                                 j++ )
+294                         \{
+296                                 fprintf(leak\_file,
+297                                         \textcolor{stringliteral}{"%02x "},
+298                                         block_offset_realmem(block\_ptr)[j]);
+299                         \}
+300                         fprintf(leak\_file, \textcolor{stringliteral}{"\(\backslash\)n"});
+301                 \}
+302         \}
+303 
+304         \textcolor{keywordflow}{if} ( close\_file )
+305                 fclose(leak\_file);
+306 
+307         \textcolor{comment}{/* try to free whatever we didn't during runtime; if any of these are}
+308 \textcolor{comment}{         * screwed (heap corruption) then this will probably trigger a crash */}
+309         \textcolor{keywordflow}{while} ( \_memblocks.size() > 0 )
+310         \{
+311                 free(\_memblocks.back());
+312                 \_memblocks.pop\_back();
+313         \}
+314 \}
+\end{DoxyCode}
+\index{Allocator@{Allocator}!Tracked\-Alloc@{Tracked\-Alloc}}
+\index{Tracked\-Alloc@{Tracked\-Alloc}!Allocator@{Allocator}}
+\subsubsection[{Tracked\-Alloc}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Allocator\-::\-Tracked\-Alloc (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{num\-\_\-bytes, }
+\item[{const char $\ast$}]{file, }
+\item[{const char $\ast$}]{function, }
+\item[{const uint32\-\_\-t}]{line, }
+\item[{const Object $\ast$}]{owner = {\ttfamily nullptr}}
+\end{DoxyParamCaption}
+)}\label{class_allocator_aff5c82b73f460d9520d440373b86acdb}
+Tracked version of malloc -\/ use the M\-A\-L\-L\-O\-C macro to call this, as it will setup the parameters for you, barring the num\-\_\-bytes.
+
+This function will dynamically alter the requested amount in order to leave space for a header and footer; the client code does not need to handle, or be aware, of this fact.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em num\-\_\-bytes} & The number of bytes to allocate \\
+\hline
+\mbox{\tt in}  & {\em file} & The file this method was called in \\
+\hline
+\mbox{\tt in}  & {\em function} & The function this method was called in \\
+\hline
+\mbox{\tt in}  & {\em line} & The line number in the file this method was called in \\
+\hline
+\mbox{\tt in}  & {\em owner} & (Optional) The owner of the memory block \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A pointer to the allocated memory, or a nullptr if the allocation failed. 
+\end{DoxyReturn}
+
+
+Definition at line 319 of file Allocator.\-cc.
+
+
+
+References \-\_\-allocs, \-\_\-current\-\_\-allocated, \-\_\-memblocks, \-\_\-mutex, \-\_\-total\-\_\-allocated, block\-\_\-offset\-\_\-footer, block\-\_\-offset\-\_\-realmem, memblock\-\_\-header\-::file, memblock\-\_\-header\-::footer, memblock\-\_\-header\-::function, H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E, memblock\-\_\-header\-::line, memblock\-\_\-footer\-::magic, memblock\-\_\-header\-::magic, mem\-\_\-footer\-\_\-magic, mem\-\_\-header\-\_\-magic, M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T, memblock\-\_\-header\-::owner, P\-A\-T\-H\-\_\-\-C\-H\-A\-R, memblock\-\_\-header\-::real\-\_\-size, and memblock\-\_\-header\-::requested\-\_\-size.
+
+
+
+Referenced by Tracked\-Realloc().
+
+
+\begin{DoxyCode}
+326 \{
+327         memblock_header*        mem\_block = \textcolor{keyword}{nullptr};
+328         memblock_footer*        mem\_footer = \textcolor{keyword}{nullptr};
+329         \textcolor{keywordtype}{void}*                   mem\_return = \textcolor{keyword}{nullptr};
+330         uint32\_t                patched\_alloc = 0;      \textcolor{comment}{// num\_bytes + memblocks}
+331 
+332         \textcolor{comment}{// allocate the requested amount, plus the size of the header & footer memblocks}
+333         patched\_alloc = num\_bytes + HEADER_FOOTER_SIZE;
+334 
+335         \textcolor{comment}{// the actual, real, physical allocation of memory}
+336         mem\_block = (memblock_header*)malloc(patched\_alloc);
+337 
+338         \textcolor{keywordflow}{if} ( mem\_block == \textcolor{keyword}{nullptr} )
+339                 \textcolor{keywordflow}{goto} alloc\_failure;
+340 
+341         \textcolor{comment}{// initialize the value for the new memory}
+342         memset(mem\_block, MEM_ON_INIT, patched\_alloc);
+343 
+344 \textcolor{preprocessor}{#if defined(\_WIN32)}
+345 \textcolor{preprocessor}{}\textcolor{preprocessor}{#       define PATH\_CHAR        '\(\backslash\)\(\backslash\)'}
+346 \textcolor{preprocessor}{}\textcolor{preprocessor}{#else}
+347 \textcolor{preprocessor}{}\textcolor{preprocessor}{#       define PATH\_CHAR        '/'}
+348 \textcolor{preprocessor}{}\textcolor{preprocessor}{#endif}
+349 \textcolor{preprocessor}{}        \textcolor{comment}{// we don't want the full path information that compilers set}
+350         \textcolor{keywordflow}{if} (( file = strrchr(file, PATH_CHAR)) != \textcolor{keyword}{nullptr} )
+351                 file++;
+352 
+353         \textcolor{comment}{// calculate the offsets of the return memory and the footer}
+354         mem\_return = block_offset_realmem(mem\_block);
+355         mem\_footer = block_offset_footer(mem\_block, num\_bytes);
+356 
+357         \textcolor{comment}{// prepare the structure internals}
+358         mem\_footer->magic       = mem_footer_magic;
+359         mem\_block->footer       = mem\_footer;
+360         mem\_block->magic        = mem_header_magic;
+361         mem\_block->owner        = owner;
+362         mem\_block->line         = line;
+363         mem\_block->real_size            = patched\_alloc;
+364         mem\_block->requested_size       = num\_bytes;
+365 
+366         \textcolor{comment}{/* you should be using strlcpy if you're doing character buffer copying}
+367 \textcolor{comment}{         * and other functionality!! For the sake of securing your application,}
+368 \textcolor{comment}{         * please USE IT!}
+369 \textcolor{comment}{         * We provide a 'normal, well-known' alternative for the sake of the}
+370 \textcolor{comment}{         * example using strncpy (which is in standard headers everywhere) */}
+371 \textcolor{preprocessor}{#if defined(HAVE\_STRLCPY)}
+372 \textcolor{preprocessor}{}        strlcpy(mem\_block->file, file, \textcolor{keyword}{sizeof}(mem\_block->file));
+373         strlcpy(mem\_block->function, \textcolor{keyword}{function}, \textcolor{keyword}{sizeof}(mem\_block->function));
+374 \textcolor{preprocessor}{#else}
+375 \textcolor{preprocessor}{}        strncpy(mem\_block->file, file, \textcolor{keyword}{sizeof}(mem\_block->file)-1);
+376         strncpy(mem\_block->function, \textcolor{keyword}{function}, \textcolor{keyword}{sizeof}(mem\_block->function)-1);
+377 \textcolor{preprocessor}{#endif}
+378 \textcolor{preprocessor}{}
+379         \textcolor{comment}{/* lock this class, only 1 thread to update sensitive internals at a}
+380 \textcolor{comment}{         * time - lock for as little time as possible! */}
+381         _mutex.lock();
+382 
+383         \textcolor{comment}{// update the stats, using patched values}
+384         _allocs++;
+385         _current_allocated += patched\_alloc;
+386         _total_allocated += patched\_alloc;
+387         \textcolor{comment}{// append it to the vector}
+388         _memblocks.push\_back(mem\_block);
+389 
+390         \textcolor{comment}{// unlock the allocator, other threads can now allocate from this class}
+391         _mutex.unlock();
+392 
+393         \textcolor{keywordflow}{return} mem\_return;
+394 
+395 alloc\_failure:
+396         \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};
+397 \}
+\end{DoxyCode}
+\index{Allocator@{Allocator}!Tracked\-Free@{Tracked\-Free}}
+\index{Tracked\-Free@{Tracked\-Free}!Allocator@{Allocator}}
+\subsubsection[{Tracked\-Free}]{\setlength{\rightskip}{0pt plus 5cm}void Allocator\-::\-Tracked\-Free (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{memory}
+\end{DoxyParamCaption}
+)}\label{class_allocator_ae88ef2e17cf916e2efdf96280adca9fb}
+Tracked version of free -\/ use the F\-R\-E\-E macro to call this, for consistency and potential future changes.
+
+In compliance with the C standard, if memory is a nullptr, this function performs no action. No action is also performed if a memory validation check fails (i.\-e. the supplied block is corrupt or otherwise invalid), as doing so could crash the application, and miss logging the information.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em memory} & A pointer to the memory previously allocated by Tracked\-Alloc (which should be called via M\-A\-L\-L\-O\-C) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 402 of file Allocator.\-cc.
+
+
+
+References \-\_\-current\-\_\-allocated, \-\_\-frees, \-\_\-memblocks, \-\_\-mutex, block\-\_\-offset\-\_\-header, memblock\-\_\-header\-::file, memblock\-\_\-header\-::line, M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E, memblock\-\_\-header\-::real\-\_\-size, memblock\-\_\-header\-::requested\-\_\-size, and Validate\-Memory().
+
+
+
+Referenced by Tracked\-Realloc().
+
+
+\begin{DoxyCode}
+405 \{
+406         memblock_header*        mem\_block = \textcolor{keyword}{nullptr};
+407 
+408         \textcolor{comment}{// as per the C standard, if it's a nullptr, do nothing}
+409         \textcolor{keywordflow}{if} ( memory == \textcolor{keyword}{nullptr} )
+410                 \textcolor{keywordflow}{return};
+411 
+412         \textcolor{keywordflow}{if} ( !ValidateMemory(memory) )
+413                 \textcolor{keywordflow}{return};
+414 
+415         mem\_block = block_offset_header(memory);
+416 
+417 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_OP\_TO\_STDOUT)}
+418 \textcolor{preprocessor}{}        printf( \textcolor{stringliteral}{"free [%s (%u bytes) line %u]\(\backslash\)n"}
+419                 \textcolor{stringliteral}{"\(\backslash\)tBlock: %p | Usable Block: %p\(\backslash\)n"},
+420                 mem\_block->file, mem\_block->requested_size, mem\_block->line,
+421                 mem\_block, memory);
+422 \textcolor{preprocessor}{#endif}
+423 \textcolor{preprocessor}{}
+424         \textcolor{comment}{// stop other class modifications}
+425         _mutex.lock();
+426 
+427         \textcolor{comment}{// remove the mem\_block from the vector}
+428         _memblocks.erase(std::find(_memblocks.begin(), _memblocks.end(), mem\_block));
+429         \textcolor{comment}{// update the context stats}
+430         _frees++;
+431         _current_allocated -= (mem\_block->real_size);
+432 
+433         \textcolor{comment}{// we're done with the class internals, open it up again}
+434         _mutex.unlock();
+435 
+436         \textcolor{comment}{// fill the app-allocated memory (highlights use after free)}
+437         memset(mem\_block, MEM_AFTER_FREE, mem\_block->real_size);
+438         \textcolor{comment}{// perform the actual freeing of memory, including our header + footer}
+439         free(mem\_block);
+440 
+441         \textcolor{keywordflow}{return};
+442 \}
+\end{DoxyCode}
+\index{Allocator@{Allocator}!Tracked\-Realloc@{Tracked\-Realloc}}
+\index{Tracked\-Realloc@{Tracked\-Realloc}!Allocator@{Allocator}}
+\subsubsection[{Tracked\-Realloc}]{\setlength{\rightskip}{0pt plus 5cm}void $\ast$ Allocator\-::\-Tracked\-Realloc (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{memory\-\_\-block, }
+\item[{const uint32\-\_\-t}]{num\-\_\-bytes, }
+\item[{const char $\ast$}]{file, }
+\item[{const char $\ast$}]{function, }
+\item[{const uint32\-\_\-t}]{line, }
+\item[{const Object $\ast$}]{owner = {\ttfamily nullptr}}
+\end{DoxyParamCaption}
+)}\label{class_allocator_a4b9da5e10ea4e5952437b83ba54742ad}
+Tracked version of realloc -\/ use the R\-E\-A\-L\-L\-O\-C macro to call this.
+
+In compliance with the C standard, if memory\-\_\-block is a nullptr, the end result is the same as calling Tracked\-Alloc (i.\-e. malloc). The same applies if num\-\_\-bytes is 0 -\/ Tracked\-Free (i.\-e. free) will be called on the memory\-\_\-block.
+
+No validation is performed on the original block of memory, and unlike the real realloc, we call Tracked\-Alloc regardless of size differences and other parameters. The previous memory is then moved into this newly allocated block, and the original freed.
+
+As a result, a Tracked\-Realloc guarantees that the returned pointer will never be the same as the one passed in.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em memory\-\_\-block} & The pointer to memory returned by \hyperlink{class_allocator_aff5c82b73f460d9520d440373b86acdb}{Tracked\-Alloc()} \\
+\hline
+\mbox{\tt in}  & {\em num\-\_\-bytes} & The new number of bytes to allocate \\
+\hline
+\mbox{\tt in}  & {\em file} & The file this method was called in \\
+\hline
+\mbox{\tt in}  & {\em function} & The function this method was called in \\
+\hline
+\mbox{\tt in}  & {\em line} & The line number in the file this method was called in \\
+\hline
+\mbox{\tt in}  & {\em owner} & (Optional) The owner of the memory block \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em nullptr} & if the function fails due to invalid parameters, or the call to realloc fails \\
+\hline
+\end{DoxyRetVals}
+\begin{DoxyReturn}{Returns}
+A pointer to the usable block of memory allocated 
+\end{DoxyReturn}
+
+
+Definition at line 447 of file Allocator.\-cc.
+
+
+
+References \-\_\-mutex, block\-\_\-offset\-\_\-header, memblock\-\_\-header\-::requested\-\_\-size, Tracked\-Alloc(), and Tracked\-Free().
+
+
+\begin{DoxyCode}
+455 \{
+456         memblock_header*        mem\_block = \textcolor{keyword}{nullptr};
+457         \textcolor{keywordtype}{void}*                   mem\_return = \textcolor{keyword}{nullptr};
+458 
+459         \textcolor{keywordflow}{if} ( memory\_block == \textcolor{keyword}{nullptr} )
+460         \{
+461                 \textcolor{comment}{// if real\_mem is NULL, call malloc [ISO C]}
+462                 \textcolor{keywordflow}{return} TrackedAlloc(new\_num\_bytes, file, \textcolor{keyword}{function}, line, owner);
+463         \}
+464 
+465         \textcolor{keywordflow}{if} ( new\_num\_bytes == 0 )
+466         \{
+467                 \textcolor{comment}{// if new\_num\_bytes is 0 & real\_mem is not null, call free [ISO C]}
+468                 TrackedFree(memory\_block);
+469                 \textcolor{comment}{/* whether it works or fails, the memory is still unusable, so}
+470 \textcolor{comment}{                 * return a nullptr */}
+471                 \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};
+472         \}
+473 
+474         _mutex.lock();
+475 
+476 \textcolor{preprocessor}{#if !defined(DISABLE\_MEMORY\_OP\_TO\_STDOUT)}
+477 \textcolor{preprocessor}{}        \textcolor{comment}{// since we call track\_alloc, make the log info accurate}
+478         printf( \textcolor{stringliteral}{"realloc [%s (%u bytes) line %u]\(\backslash\)n"}
+479                 \textcolor{stringliteral}{"\(\backslash\)tTo be allocated in the following malloc; using memory block: %p\(\backslash\)n"},
+480                 file, new\_num\_bytes, line,
+481                 memory\_block);
+482 \textcolor{preprocessor}{#endif}
+483 \textcolor{preprocessor}{}
+484         mem\_return = (\textcolor{keywordtype}{void}*)TrackedAlloc(new\_num\_bytes, file, \textcolor{keyword}{function}, line, owner);
+485 
+486         \textcolor{keywordflow}{if} ( mem\_return != \textcolor{keyword}{nullptr} )
+487         \{
+488                 mem\_block = block_offset_header(memory\_block);
+489 
+490                 \textcolor{comment}{// move the original data into the new allocation}
+491                 mem\_block->requested_size < new\_num\_bytes ?
+492                         memmove(mem\_return, memory\_block, new\_num\_bytes) :
+493                         memmove(mem\_return, memory\_block, mem\_block->requested\_size);
+494 
+495                 \textcolor{comment}{// free the original block}
+496                 TrackedFree(memory\_block);
+497         \}
+498 
+499         _mutex.unlock();
+500 
+501         \textcolor{keywordflow}{return} mem\_return;
+502 \}
+\end{DoxyCode}
+\index{Allocator@{Allocator}!Validate\-Memory@{Validate\-Memory}}
+\index{Validate\-Memory@{Validate\-Memory}!Allocator@{Allocator}}
+\subsubsection[{Validate\-Memory}]{\setlength{\rightskip}{0pt plus 5cm}bool Allocator\-::\-Validate\-Memory (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{memory}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_abff2b252396640dde0593c12ee7f62b4}
+Validates a block of memory; if no block is supplied, and nullptr is passed in, every tracked block currently present is validated.
+
+If present, the block passed in must be at the header, and N\-O\-T the pointer returned to the of the Tracked\-Alloc/\-Tracked\-Realloc caller.
+
+Internally calls \hyperlink{class_allocator_ad1c15835d7b080beb8c56b21e0014553}{Check\-Block()}.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em memory} & A pointer to the block of memory to validate \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em true} & if the memory is not corrupt and usable \\
+\hline
+{\em false} & if the memory failed one of the checks \\
+\hline
+\end{DoxyRetVals}
+
+
+Definition at line 507 of file Allocator.\-cc.
+
+
+
+References \-\_\-memblocks, \-\_\-mutex, block\-\_\-offset\-\_\-header, Check\-Block(), and E\-C\-\_\-\-No\-Error.
+
+
+
+Referenced by Tracked\-Free().
+
+
+\begin{DoxyCode}
+510 \{
+511         \textcolor{keywordtype}{bool}    ret = \textcolor{keyword}{true};
+512 
+513         _mutex.lock();
+514 
+515         \textcolor{comment}{// if no block was specified, check the entire list}
+516         \textcolor{keywordflow}{if} ( memory == \textcolor{keyword}{nullptr} )
+517         \{
+518                 \textcolor{keywordflow}{for} ( \textcolor{keyword}{auto} block : _memblocks )
+519                 \{
+520                         \textcolor{comment}{// bail if a block is invalid}
+521                         \textcolor{keywordflow}{if} ( CheckBlock(block) != E_MEMORY_ERROR::EC_NoError )
+522                         \{
+523                                 ret = \textcolor{keyword}{false};
+524                                 \textcolor{keywordflow}{break};
+525                         \}
+526                 \}
+527         \}
+528         \textcolor{keywordflow}{else}
+529         \{
+530                 memblock_header*        mem\_block = block_offset_header(memory);
+531 
+532                 ret = (CheckBlock(mem\_block) == E_MEMORY_ERROR::EC_NoError);
+533         \}
+534 
+535         _mutex.unlock();
+536 
+537         \textcolor{keywordflow}{return} ret;
+538 \}
+\end{DoxyCode}
+
+
+\subsection{Friends And Related Function Documentation}
+\index{Allocator@{Allocator}!Runtime@{Runtime}}
+\index{Runtime@{Runtime}!Allocator@{Allocator}}
+\subsubsection[{Runtime}]{\setlength{\rightskip}{0pt plus 5cm}friend class {\bf Runtime}\hspace{0.3cm}{\ttfamily [friend]}}\label{class_allocator_af3d14e26ba8af9e6cc5a32aad8446de7}
+
+
+Definition at line 148 of file Allocator.\-h.
+
+
+
+\subsection{Member Data Documentation}
+\index{Allocator@{Allocator}!\-\_\-allocs@{\-\_\-allocs}}
+\index{\-\_\-allocs@{\-\_\-allocs}!Allocator@{Allocator}}
+\subsubsection[{\-\_\-allocs}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t Allocator\-::\-\_\-allocs\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_a62a5f8bb48b4417a9c20fec53dfd7201}
+The amount of times new has been called successfully 
+
+Definition at line 158 of file Allocator.\-h.
+
+
+
+Referenced by Output\-Memory\-Info(), and Tracked\-Alloc().
+
+\index{Allocator@{Allocator}!\-\_\-current\-\_\-allocated@{\-\_\-current\-\_\-allocated}}
+\index{\-\_\-current\-\_\-allocated@{\-\_\-current\-\_\-allocated}!Allocator@{Allocator}}
+\subsubsection[{\-\_\-current\-\_\-allocated}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t Allocator\-::\-\_\-current\-\_\-allocated\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_a3df5e505a4e72b64ea8c055e7f385bb3}
+Currently allocated amount of bytes 
+
+Definition at line 160 of file Allocator.\-h.
+
+
+
+Referenced by Output\-Memory\-Info(), Tracked\-Alloc(), and Tracked\-Free().
+
+\index{Allocator@{Allocator}!\-\_\-frees@{\-\_\-frees}}
+\index{\-\_\-frees@{\-\_\-frees}!Allocator@{Allocator}}
+\subsubsection[{\-\_\-frees}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t Allocator\-::\-\_\-frees\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_aef8120c4c4eeec914b6fb7aa609eb533}
+The amount of times delete has been called successfully 
+
+Definition at line 159 of file Allocator.\-h.
+
+
+
+Referenced by Output\-Memory\-Info(), and Tracked\-Free().
+
+\index{Allocator@{Allocator}!\-\_\-memblocks@{\-\_\-memblocks}}
+\index{\-\_\-memblocks@{\-\_\-memblocks}!Allocator@{Allocator}}
+\subsubsection[{\-\_\-memblocks}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf memblock\-\_\-header}$\ast$$>$ Allocator\-::\-\_\-memblocks\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_a14b439fa46e392aca969b4c4cf99fd19}
+Performance benchmarks have shown that a vector is fastest when the size of the element is known, for insert, remove, and search! \href{http://www.baptiste-wicht.com/2012/12/cpp-benchmark-vector-list-deque/}{\tt http\-://www.\-baptiste-\/wicht.\-com/2012/12/cpp-\/benchmark-\/vector-\/list-\/deque/}
+
+The small data type (a pointer) is most beneficial here. 
+
+Definition at line 176 of file Allocator.\-h.
+
+
+
+Referenced by Allocator(), Output\-Memory\-Info(), Tracked\-Alloc(), Tracked\-Free(), Validate\-Memory(), and $\sim$\-Allocator().
+
+\index{Allocator@{Allocator}!\-\_\-mutex@{\-\_\-mutex}}
+\index{\-\_\-mutex@{\-\_\-mutex}!Allocator@{Allocator}}
+\subsubsection[{\-\_\-mutex}]{\setlength{\rightskip}{0pt plus 5cm}std\-::recursive\-\_\-mutex Allocator\-::\-\_\-mutex\hspace{0.3cm}{\ttfamily [mutable]}, {\ttfamily [private]}}\label{class_allocator_aeb33ace056dd043efbec5ea4115ae305}
+The lock for making modifications to \-\_\-memblocks. Mutable to allow constness for retrieval functions, recursive for multi-\/locking. 
+
+Definition at line 167 of file Allocator.\-h.
+
+
+
+Referenced by Tracked\-Alloc(), Tracked\-Free(), Tracked\-Realloc(), and Validate\-Memory().
+
+\index{Allocator@{Allocator}!\-\_\-total\-\_\-allocated@{\-\_\-total\-\_\-allocated}}
+\index{\-\_\-total\-\_\-allocated@{\-\_\-total\-\_\-allocated}!Allocator@{Allocator}}
+\subsubsection[{\-\_\-total\-\_\-allocated}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t Allocator\-::\-\_\-total\-\_\-allocated\hspace{0.3cm}{\ttfamily [private]}}\label{class_allocator_adaa40e36af99c1828a96f264ee405331}
+The total amount of allocated bytes 
+
+Definition at line 161 of file Allocator.\-h.
+
+
+
+Referenced by Output\-Memory\-Info(), and Tracked\-Alloc().
+

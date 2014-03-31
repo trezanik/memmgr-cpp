@@ -1,0 +1,186 @@
+\section{Allocator.\-cc File Reference}
+\label{_allocator_8cc}\index{Allocator.\-cc@{Allocator.\-cc}}
+{\ttfamily \#include \char`\"{}Allocator.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$algorithm$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{_allocator_8cc_ae6dbf32c394f00509d560b40c81bccc6}{M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C}~250
+\item 
+\#define \hyperlink{_allocator_8cc_a2db6c9af5aa02be13a49f706da54385c}{M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C}~0x\-C\-A\-F\-E\-F\-A\-C\-E
+\item 
+\#define \hyperlink{_allocator_8cc_adb9b241eeb9083c288e77112c7e7b0a5}{M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C}~0x\-D\-E\-A\-D\-B\-E\-E\-F
+\item 
+\#define \hyperlink{_allocator_8cc_ada833569779d8c8a9b8415e8112c1fad}{M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T}~0x0\-F
+\item 
+\#define \hyperlink{_allocator_8cc_ab4cd30097b76edd986e9f0db035b6279}{M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E}~0x\-F\-F
+\item 
+\#define \hyperlink{_allocator_8cc_a4535345fe0fa840b2b74ce4eaf6dd004}{block\-\_\-offset\-\_\-header}(real\-\_\-mem)~(\hyperlink{structmemblock__header}{memblock\-\_\-header}$\ast$)((uint8\-\_\-t$\ast$)real\-\_\-mem -\/ sizeof(\hyperlink{structmemblock__header}{memblock\-\_\-header}))
+\item 
+\#define \hyperlink{_allocator_8cc_ad4ec1862e1c0007f85c0d0eb6b75ff91}{block\-\_\-offset\-\_\-realmem}(memblock)~(void$\ast$)((uint8\-\_\-t$\ast$)memblock + sizeof(\hyperlink{structmemblock__header}{memblock\-\_\-header}))
+\item 
+\#define \hyperlink{_allocator_8cc_aff46be828cb143ee0ffde154ac547a46}{block\-\_\-offset\-\_\-footer}(memblock, num\-\_\-bytes)~(\hyperlink{structmemblock__footer}{memblock\-\_\-footer}$\ast$)((uint8\-\_\-t$\ast$)memblock + (sizeof(\hyperlink{structmemblock__header}{memblock\-\_\-header}) + num\-\_\-bytes))
+\item 
+\#define \hyperlink{_allocator_8cc_a23fcee323662954abeea9a2b0d3d7bdf}{H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E}~(sizeof(\hyperlink{structmemblock__header}{memblock\-\_\-header}) + sizeof(\hyperlink{structmemblock__footer}{memblock\-\_\-footer}))
+\item 
+\#define \hyperlink{_allocator_8cc_a83cebbffc784c0755f531e4c19abf8d0}{P\-A\-T\-H\-\_\-\-C\-H\-A\-R}~'/'
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const unsigned \hyperlink{_allocator_8cc_ac870dbfc709df78d9ee713843f55e894}{mem\-\_\-header\-\_\-magic} = \hyperlink{_allocator_8cc_a2db6c9af5aa02be13a49f706da54385c}{M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C}
+\item 
+const unsigned \hyperlink{_allocator_8cc_a89ab5016ef388d7a5691e4d77208cc32}{mem\-\_\-footer\-\_\-magic} = \hyperlink{_allocator_8cc_adb9b241eeb9083c288e77112c7e7b0a5}{M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyAuthor}{Author}
+James Warren 
+\end{DoxyAuthor}
+\begin{DoxyCopyright}{Copyright}
+James Warren, 2013 
+\end{DoxyCopyright}
+\begin{DoxyParagraph}{License\-:}
+Zlib (see license.\-txt or \href{http://opensource.org/licenses/Zlib}{\tt http\-://opensource.\-org/licenses/\-Zlib}) 
+\end{DoxyParagraph}
+
+
+Definition in file \hyperlink{_allocator_8cc_source}{Allocator.\-cc}.
+
+
+
+\subsection{Macro Definition Documentation}
+\index{Allocator.\-cc@{Allocator.\-cc}!block\-\_\-offset\-\_\-footer@{block\-\_\-offset\-\_\-footer}}
+\index{block\-\_\-offset\-\_\-footer@{block\-\_\-offset\-\_\-footer}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{block\-\_\-offset\-\_\-footer}]{\setlength{\rightskip}{0pt plus 5cm}\#define block\-\_\-offset\-\_\-footer(
+\begin{DoxyParamCaption}
+\item[{}]{memblock, }
+\item[{}]{num\-\_\-bytes}
+\end{DoxyParamCaption}
+)~({\bf memblock\-\_\-footer}$\ast$)((uint8\-\_\-t$\ast$)memblock + (sizeof({\bf memblock\-\_\-header}) + num\-\_\-bytes))}\label{_allocator_8cc_aff46be828cb143ee0ffde154ac547a46}
+
+
+Definition at line 44 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Tracked\-Alloc().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!block\-\_\-offset\-\_\-header@{block\-\_\-offset\-\_\-header}}
+\index{block\-\_\-offset\-\_\-header@{block\-\_\-offset\-\_\-header}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{block\-\_\-offset\-\_\-header}]{\setlength{\rightskip}{0pt plus 5cm}\#define block\-\_\-offset\-\_\-header(
+\begin{DoxyParamCaption}
+\item[{}]{real\-\_\-mem}
+\end{DoxyParamCaption}
+)~({\bf memblock\-\_\-header}$\ast$)((uint8\-\_\-t$\ast$)real\-\_\-mem -\/ sizeof({\bf memblock\-\_\-header}))}\label{_allocator_8cc_a4535345fe0fa840b2b74ce4eaf6dd004}
+
+
+Definition at line 40 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Tracked\-Free(), Allocator\-::\-Tracked\-Realloc(), and Allocator\-::\-Validate\-Memory().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!block\-\_\-offset\-\_\-realmem@{block\-\_\-offset\-\_\-realmem}}
+\index{block\-\_\-offset\-\_\-realmem@{block\-\_\-offset\-\_\-realmem}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{block\-\_\-offset\-\_\-realmem}]{\setlength{\rightskip}{0pt plus 5cm}\#define block\-\_\-offset\-\_\-realmem(
+\begin{DoxyParamCaption}
+\item[{}]{memblock}
+\end{DoxyParamCaption}
+)~(void$\ast$)((uint8\-\_\-t$\ast$)memblock + sizeof({\bf memblock\-\_\-header}))}\label{_allocator_8cc_ad4ec1862e1c0007f85c0d0eb6b75ff91}
+
+
+Definition at line 42 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Output\-Memory\-Info(), and Allocator\-::\-Tracked\-Alloc().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E@{H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E}}
+\index{H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E@{H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-E\-A\-D\-E\-R\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-S\-I\-Z\-E~(sizeof({\bf memblock\-\_\-header}) + sizeof({\bf memblock\-\_\-footer}))}\label{_allocator_8cc_a23fcee323662954abeea9a2b0d3d7bdf}
+
+
+Definition at line 46 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Output\-Memory\-Info(), and Allocator\-::\-Tracked\-Alloc().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C@{M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C}}
+\index{M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C@{M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-A\-X\-\_\-\-L\-E\-N\-\_\-\-G\-E\-N\-E\-R\-I\-C~250}\label{_allocator_8cc_ae6dbf32c394f00509d560b40c81bccc6}
+
+
+Definition at line 30 of file Allocator.\-cc.
+
+\index{Allocator.\-cc@{Allocator.\-cc}!M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E@{M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E}}
+\index{M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E@{M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-E\-M\-\_\-\-A\-F\-T\-E\-R\-\_\-\-F\-R\-E\-E~0x\-F\-F}\label{_allocator_8cc_ab4cd30097b76edd986e9f0db035b6279}
+
+
+Definition at line 37 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Tracked\-Free().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C@{M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C}}
+\index{M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C@{M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C~0x\-D\-E\-A\-D\-B\-E\-E\-F}\label{_allocator_8cc_adb9b241eeb9083c288e77112c7e7b0a5}
+
+
+Definition at line 34 of file Allocator.\-cc.
+
+\index{Allocator.\-cc@{Allocator.\-cc}!M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C@{M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C}}
+\index{M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C@{M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C~0x\-C\-A\-F\-E\-F\-A\-C\-E}\label{_allocator_8cc_a2db6c9af5aa02be13a49f706da54385c}
+
+
+Definition at line 33 of file Allocator.\-cc.
+
+\index{Allocator.\-cc@{Allocator.\-cc}!M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T@{M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T}}
+\index{M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T@{M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-E\-M\-\_\-\-O\-N\-\_\-\-I\-N\-I\-T~0x0\-F}\label{_allocator_8cc_ada833569779d8c8a9b8415e8112c1fad}
+
+
+Definition at line 36 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Tracked\-Alloc().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!P\-A\-T\-H\-\_\-\-C\-H\-A\-R@{P\-A\-T\-H\-\_\-\-C\-H\-A\-R}}
+\index{P\-A\-T\-H\-\_\-\-C\-H\-A\-R@{P\-A\-T\-H\-\_\-\-C\-H\-A\-R}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{P\-A\-T\-H\-\_\-\-C\-H\-A\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-H\-\_\-\-C\-H\-A\-R~'/'}\label{_allocator_8cc_a83cebbffc784c0755f531e4c19abf8d0}
+
+
+Referenced by Allocator\-::\-Tracked\-Alloc().
+
+
+
+\subsection{Variable Documentation}
+\index{Allocator.\-cc@{Allocator.\-cc}!mem\-\_\-footer\-\_\-magic@{mem\-\_\-footer\-\_\-magic}}
+\index{mem\-\_\-footer\-\_\-magic@{mem\-\_\-footer\-\_\-magic}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{mem\-\_\-footer\-\_\-magic}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned mem\-\_\-footer\-\_\-magic = {\bf M\-E\-M\-\_\-\-F\-O\-O\-T\-E\-R\-\_\-\-M\-A\-G\-I\-C}}\label{_allocator_8cc_a89ab5016ef388d7a5691e4d77208cc32}
+
+
+Definition at line 52 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), and Allocator\-::\-Tracked\-Alloc().
+
+\index{Allocator.\-cc@{Allocator.\-cc}!mem\-\_\-header\-\_\-magic@{mem\-\_\-header\-\_\-magic}}
+\index{mem\-\_\-header\-\_\-magic@{mem\-\_\-header\-\_\-magic}!Allocator.cc@{Allocator.\-cc}}
+\subsubsection[{mem\-\_\-header\-\_\-magic}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned mem\-\_\-header\-\_\-magic = {\bf M\-E\-M\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-M\-A\-G\-I\-C}}\label{_allocator_8cc_ac870dbfc709df78d9ee713843f55e894}
+
+
+Definition at line 51 of file Allocator.\-cc.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), and Allocator\-::\-Tracked\-Alloc().
+

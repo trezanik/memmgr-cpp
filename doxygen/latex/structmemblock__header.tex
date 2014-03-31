@@ -1,0 +1,123 @@
+\section{memblock\-\_\-header Struct Reference}
+\label{structmemblock__header}\index{memblock\-\_\-header@{memblock\-\_\-header}}
+
+
+{\ttfamily \#include $<$Allocator.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+unsigned \hyperlink{structmemblock__header_a10ebc950edccb690a784aceb6362d696}{magic}
+\item 
+\hyperlink{structmemblock__footer}{memblock\-\_\-footer} $\ast$ \hyperlink{structmemblock__header_ab9999ece91b34ae2742865b27791b374}{footer}
+\item 
+const Object $\ast$ \hyperlink{structmemblock__header_a4a1f4790e308d4211fee21b6eceeebc4}{owner}
+\item 
+char \hyperlink{structmemblock__header_a97093dcb31daa58a36e471701b63d0d3}{file} \mbox{[}\hyperlink{_allocator_8h_ac811ed79333c5131bf74f609b0b67fcf}{M\-E\-M\-\_\-\-M\-A\-X\-\_\-\-F\-I\-L\-E\-N\-A\-M\-E\-\_\-\-L\-E\-N\-G\-T\-H}+1\mbox{]}
+\item 
+char \hyperlink{structmemblock__header_ab3a09c5ab1300cb51e93ff910431c40f}{function} \mbox{[}\hyperlink{_allocator_8h_af15f994b428f827c19ae31d1df47d7ca}{M\-E\-M\-\_\-\-M\-A\-X\-\_\-\-F\-U\-N\-C\-T\-I\-O\-N\-\_\-\-L\-E\-N\-G\-T\-H}+1\mbox{]}
+\item 
+uint32\-\_\-t \hyperlink{structmemblock__header_aa2bb67f4837cf735956c591e23e4c800}{line}
+\item 
+uint32\-\_\-t \hyperlink{structmemblock__header_a9f32a9108b8ca49a6296605b42ee3a54}{requested\-\_\-size}
+\item 
+uint32\-\_\-t \hyperlink{structmemblock__header_acbea4f5572643309ac41e9493baaa7f7}{real\-\_\-size}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This structure is added at the start of a block of allocated memory, when U\-S\-I\-N\-G\-\_\-\-M\-E\-M\-O\-R\-Y\-\_\-\-D\-E\-B\-U\-G\-G\-I\-N\-G is defined. 
+
+Definition at line 75 of file Allocator.\-h.
+
+
+
+\subsection{Member Data Documentation}
+\index{memblock\-\_\-header@{memblock\-\_\-header}!file@{file}}
+\index{file@{file}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{file}]{\setlength{\rightskip}{0pt plus 5cm}char memblock\-\_\-header\-::file\mbox{[}{\bf M\-E\-M\-\_\-\-M\-A\-X\-\_\-\-F\-I\-L\-E\-N\-A\-M\-E\-\_\-\-L\-E\-N\-G\-T\-H}+1\mbox{]}}\label{structmemblock__header_a97093dcb31daa58a36e471701b63d0d3}
+The file this memory block was created in; is not allocated dynamically, and so is bound by the M\-E\-M\-\_\-\-M\-A\-X\-\_\-\-F\-I\-L\-E\-N\-A\-M\-E\-\_\-\-L\-E\-N\-G\-T\-H definition. 
+
+Definition at line 97 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), Allocator\-::\-Tracked\-Alloc(), and Allocator\-::\-Tracked\-Free().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!footer@{footer}}
+\index{footer@{footer}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{footer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf memblock\-\_\-footer}$\ast$ memblock\-\_\-header\-::footer}\label{structmemblock__header_ab9999ece91b34ae2742865b27791b374}
+A pointer to this memory blocks footer 
+
+Definition at line 85 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), and Allocator\-::\-Tracked\-Alloc().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!function@{function}}
+\index{function@{function}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{function}]{\setlength{\rightskip}{0pt plus 5cm}char memblock\-\_\-header\-::function\mbox{[}{\bf M\-E\-M\-\_\-\-M\-A\-X\-\_\-\-F\-U\-N\-C\-T\-I\-O\-N\-\_\-\-L\-E\-N\-G\-T\-H}+1\mbox{]}}\label{structmemblock__header_ab3a09c5ab1300cb51e93ff910431c40f}
+The function name this memory block was created in; like the file member, is not allocated dynamically, and so is bound by the M\-E\-M\-\_\-\-M\-A\-X\-\_\-\-F\-U\-N\-C\-T\-I\-O\-N\-\_\-\-L\-E\-N\-G\-T\-H definition 
+
+Definition at line 101 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Tracked\-Alloc().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!line@{line}}
+\index{line@{line}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{line}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t memblock\-\_\-header\-::line}\label{structmemblock__header_aa2bb67f4837cf735956c591e23e4c800}
+The line in the file this memory block was created in 
+
+Definition at line 103 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), Allocator\-::\-Tracked\-Alloc(), and Allocator\-::\-Tracked\-Free().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!magic@{magic}}
+\index{magic@{magic}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{magic}]{\setlength{\rightskip}{0pt plus 5cm}unsigned memblock\-\_\-header\-::magic}\label{structmemblock__header_a10ebc950edccb690a784aceb6362d696}
+The header magic number is used to detect if an operation on memory has written into this structure. Corrupt headers usually mean something else has written into the block -\/ an exception being if an operation has stepped too far back, to the extent of overwriting the magic number 
+
+Definition at line 82 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), and Allocator\-::\-Tracked\-Alloc().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!owner@{owner}}
+\index{owner@{owner}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{owner}]{\setlength{\rightskip}{0pt plus 5cm}const Object$\ast$ memblock\-\_\-header\-::owner}\label{structmemblock__header_a4a1f4790e308d4211fee21b6eceeebc4}
+A pointer to the object that allocated the memory. Requires manual calling, may aid in debugging certain scenarios but not needed in the majority of cases. Left here as an example of associating a block of memory with a calling Class. 
+
+Definition at line 91 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Tracked\-Alloc().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!real\-\_\-size@{real\-\_\-size}}
+\index{real\-\_\-size@{real\-\_\-size}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{real\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t memblock\-\_\-header\-::real\-\_\-size}\label{structmemblock__header_acbea4f5572643309ac41e9493baaa7f7}
+The size, in bytes, of the total allocation (header+data+footer) 
+
+Definition at line 107 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), Allocator\-::\-Tracked\-Alloc(), and Allocator\-::\-Tracked\-Free().
+
+\index{memblock\-\_\-header@{memblock\-\_\-header}!requested\-\_\-size@{requested\-\_\-size}}
+\index{requested\-\_\-size@{requested\-\_\-size}!memblock_header@{memblock\-\_\-header}}
+\subsubsection[{requested\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}uint32\-\_\-t memblock\-\_\-header\-::requested\-\_\-size}\label{structmemblock__header_a9f32a9108b8ca49a6296605b42ee3a54}
+The size, in bytes, the original request desired 
+
+Definition at line 105 of file Allocator.\-h.
+
+
+
+Referenced by Allocator\-::\-Check\-Block(), Allocator\-::\-Tracked\-Alloc(), Allocator\-::\-Tracked\-Free(), and Allocator\-::\-Tracked\-Realloc().
+

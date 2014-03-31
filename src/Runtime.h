@@ -40,8 +40,8 @@ public:
 
 	/**
 	 * Acquires the singleton reference to the class. Only used within
-	 * app.cc in order to make the runtime accessible globally (accessed by
-	 * 'runtime') - shouldn't be used outside of this.
+	 * Runtime.cc in order to make the runtime accessible globally (accessed
+	 * by 'runtime') - shouldn't be used outside of this.
 	 */
 	static Runtime& Instance()
 	{
@@ -60,7 +60,7 @@ public:
 	Allocator*
 	Memory() const;
 #endif
-	
+
 };
 
 

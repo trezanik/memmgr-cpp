@@ -148,16 +148,16 @@ Allocator::CheckBlock(
 	return E_MEMORY_ERROR::EC_NoError;
 
 null_block:
-	//generate_error(EC_InvalidParameter);
+	// Optional: Raise error
 	return E_MEMORY_ERROR::EC_NoMemoryBlock;
 corrupt_header:
-	//generate_error_str_arg(EC_CorruptHeader, 0, memory_block);
+	// Optional: Raise error
 	return E_MEMORY_ERROR::EC_CorruptHeader;
 corrupt_footer:
-	//generate_error_str_arg(EC_CorruptFooter, 0, memory_block);
+	// Optional: Raise error
 	return E_MEMORY_ERROR::EC_CorruptFooter;
 invalid_size:
-	//generate_error_str_arg(EC_MemorySizeMismatch, 0, memory_block);
+	// Optional: Raise error
 	return E_MEMORY_ERROR::EC_SizeMismatch;
 }
 
