@@ -47,7 +47,7 @@
 		(sizeof(memblock_header) + sizeof(memblock_footer))
 
 
-/* usage as variables allow them to be easily inserted into memcmp's */
+// usage as variables allow them to be easily inserted into memcmp's
 const unsigned	mem_header_magic = MEM_HEADER_MAGIC;
 const unsigned	mem_footer_magic = MEM_FOOTER_MAGIC;
 
@@ -327,6 +327,7 @@ Allocator::TrackedAlloc(
 	memblock_header*	mem_block = nullptr;
 	memblock_footer*	mem_footer = nullptr;
 	void*			mem_return = nullptr;
+	char*			p = nullptr;
 	uint32_t		patched_alloc = 0;	// num_bytes + memblocks
 
 	// allocate the requested amount, plus the size of the header & footer memblocks
@@ -347,8 +348,8 @@ Allocator::TrackedAlloc(
 #	define PATH_CHAR	'/'
 #endif
 	// we don't want the full path information that compilers set
-	if (( file = strrchr(file, PATH_CHAR)) != nullptr )
-		file++;
+	if (( p = strrchr(file, PATH_CHAR)) != nullptr )
+		file = p++;
 
 	// calculate the offsets of the return memory and the footer
 	mem_return = block_offset_realmem(mem_block);
@@ -445,7 +446,7 @@ Allocator::TrackedFree(
 
 void*
 Allocator::TrackedRealloc(
-	void* memory_block,
+	void* memory,
 	const uint32_t new_num_bytes,
 	const char* file,
 	const char* function,
@@ -456,15 +457,16 @@ Allocator::TrackedRealloc(
 	memblock_header*	mem_block = nullptr;
 	void*			mem_return = nullptr;
 
-	if ( memory_block == nullptr )
+	if ( memory == nullptr )
 	{
-		// if real_mem is NULL, call malloc [ISO C]
+		// if the memory is NULL, call malloc [ISO C]
 		return TrackedAlloc(new_num_bytes, file, function, line, owner);
 	}
 
 	if ( new_num_bytes == 0 )
 	{
-		// if new_num_bytes is 0 & real_mem is not null, call free [ISO C]
+		/* if new_num_bytes is 0 and the memory is not null, call
+		 * free() [ISO C] */
 		TrackedFree(memory_block);
 		/* whether it works or fails, the memory is still unusable, so
 		 * return a nullptr */
@@ -474,26 +476,26 @@ Allocator::TrackedRealloc(
 	_mutex.lock();
 
 #if !defined(DISABLE_MEMORY_OP_TO_STDOUT)
-	// since we call track_alloc, make the log info accurate
+	// since we call TrackedAlloc, make the log info accurate
 	printf( "realloc [%s (%u bytes) line %u]\n"
-		"\tTo be allocated in the following malloc; using memory block: %p\n",
+		"\tTo be allocated in the following malloc; using memory at: %p\n",
 		file, new_num_bytes, line,
-		memory_block);
+		memory);
 #endif
 
 	mem_return = (void*)TrackedAlloc(new_num_bytes, file, function, line, owner);
 
 	if ( mem_return != nullptr )
 	{
-		mem_block = block_offset_header(memory_block);
+		mem_block = block_offset_header(memory);
 
 		// move the original data into the new allocation
 		mem_block->requested_size < new_num_bytes ?
-			memmove(mem_return, memory_block, new_num_bytes) :
-			memmove(mem_return, memory_block, mem_block->requested_size);
+			memmove(mem_return, memory, new_num_bytes) :
+			memmove(mem_return, memory, mem_block->requested_size);
 
 		// free the original block
-		TrackedFree(memory_block);
+		TrackedFree(memory);
 	}
 
 	_mutex.unlock();
@@ -512,7 +514,7 @@ Allocator::ValidateMemory(
 
 	_mutex.lock();
 
-	// if no block was specified, check the entire list
+	// if no pointer was specified, check the entire list
 	if ( memory == nullptr )
 	{
 		for ( auto block : _memblocks )

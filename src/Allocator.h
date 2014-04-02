@@ -97,7 +97,7 @@ struct memblock_header
 	char		file[MEM_MAX_FILENAME_LENGTH+1];
 	/** The function name this memory block was created in; like the file
 	 * member, is not allocated dynamically, and so is bound by the
-	 * MEM_MAX_FUNCTION_LENGTH definition*/
+	 * MEM_MAX_FUNCTION_LENGTH definition */
 	char		function[MEM_MAX_FUNCTION_LENGTH+1];
 	/** The line in the file this memory block was created in */
 	uint32_t	line;
@@ -129,15 +129,17 @@ enum E_MEMORY_ERROR
  * Resides within the application runtime and tracks all memory allocations and
  * frees, ensuring data is not corrupt or the memory leaked.
  *
- * This overrides all new/delete calls so they will NOT be usable,
- * ensuring the correct functions are always called for the application. As
- * system headers should always be included before this one, it will not stop
- * normal API functions from working - if you do have a problem, check your
- * inclusion order!
+ * Will not exist if USING_MEMORY_DEBUGGING is not defined.
  *
- * malloc/free and associates are not overriden, enabling their usage in certain
- * special cases where using this class would be inappropriate or infeasible -
- * such as allocating for this class in the first place.
+ * Most interaction with this class should be done with the special macros:
+ * - MALLOC
+ * - REALLOC
+ * - FREE
+ * These handle providing the line number, file, and function, and will define
+ * to the real malloc/realloc/free automatically if not debugging memory.
+ *
+ * Naturally, anything allocated/freed by new/delete/malloc/realloc/free will
+ * not be tracked.
  *
  * @class Allocator
  */
@@ -196,15 +198,16 @@ private:
 
 
 	/**
-	 * Validates a block of memory; if no block is supplied, and nullptr is
-	 * passed in, every tracked block currently present is validated.
+	 * Validates a tracked bit of memory; if no pointer is supplied, so 
+	 * nullptr is passed in, every tracked block currently present in the
+	 * class is validated.
 	 *
-	 * If present, the block passed in must be at the header, and NOT the
-	 * pointer returned to the of the TrackedAlloc/TrackedRealloc caller.
+	 * If present, the memory passed in must be at the pointer to the memory
+	 * returned by the TrackedAlloc/TrackedRealloc caller.
 	 *
 	 * Internally calls CheckBlock().
 	 *
-	 * @param[in] memory A pointer to the block of memory to validate
+	 * @param[in] memory A pointer to the memory to validate
 	 * @retval true if the memory is not corrupt and usable
 	 * @retval false if the memory failed one of the checks
 	 */
@@ -279,9 +282,9 @@ public:
 	 * Tracked version of realloc - use the REALLOC macro to call this.
 	 *
 	 * In compliance with the C standard, if memory_block is a nullptr,
-	 * the end result is the same as calling TrackedAlloc (i.e. malloc). The
-	 * same applies if num_bytes is 0 - TrackedFree (i.e. free) will be
-	 * called on the memory_block.
+	 * the end result is the same as calling TrackedAlloc (i.e. malloc). 
+	 * The same applies if new_num_bytes is 0 - TrackedFree (i.e. free) 
+	 * will be called on the memory_block.
 	 *
 	 * No validation is performed on the original block of memory, and
 	 * unlike the real realloc, we call TrackedAlloc regardless of size
@@ -291,8 +294,8 @@ public:
 	 * As a result, a TrackedRealloc guarantees that the returned pointer
 	 * will never be the same as the one passed in.
 	 *
-	 * @param[in] memory_block The pointer to memory returned by TrackedAlloc()
-	 * @param[in] num_bytes The new number of bytes to allocate
+	 * @param[in] memory The pointer to memory returned by TrackedAlloc()
+	 * @param[in] new_num_bytes The new number of bytes to allocate
 	 * @param[in] file The file this method was called in
 	 * @param[in] function The function this method was called in
 	 * @param[in] line The line number in the file this method was called in
@@ -303,8 +306,8 @@ public:
 	 */
 	void*
 	TrackedRealloc(
-		void* memory_block,
-		const uint32_t num_bytes,
+		void* memory,
+		const uint32_t new_num_bytes,
 		const char* file,
 		const char* function,
 		const uint32_t line,
@@ -329,7 +332,7 @@ public:
 	#define MALLOC(size)		runtime.Memory()->TrackedAlloc(size, __FILE__, __FUNCTION__, __LINE__)
 
 /** Macro to reallocate tracked memory */
-	#define REALLOC(ptr,size)	runtime.Memory()->TrackedRealloc(ptr, size, __FILE__, __FUNCTION__, __LINE__)
+	#define REALLOC(ptr, size)	runtime.Memory()->TrackedRealloc(ptr, size, __FILE__, __FUNCTION__, __LINE__)
 
 /** Macro to delete tracked memory */
 	#define FREE(varname)		runtime.Memory()->TrackedFree(varname)
@@ -346,6 +349,7 @@ public:
 
 	// note: Windows pollution defines DELETE, so you can never use that!
 #	define MALLOC(size)		malloc(size)
+#	define REALLOC(ptr, size)	realloc(ptr, size)
 #	define FREE(varname)		free(varname)
 
 #endif	// USING_MEMORY_DEBUGGING
