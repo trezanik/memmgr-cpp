@@ -349,7 +349,7 @@ Allocator::TrackedAlloc(
 #endif
 	// we don't want the full path information that compilers set
 	if (( p = strrchr(file, PATH_CHAR)) != nullptr )
-		file = p++;
+		file = ++p;
 
 	// calculate the offsets of the return memory and the footer
 	mem_return = block_offset_realmem(mem_block);
